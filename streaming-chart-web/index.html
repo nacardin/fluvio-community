@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Infinyon WebSocket Gateway Demo</title>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    </head>
+    <body>
+        <div class="m-3">
+            <h1 class="text-2xl">Infinyon WebSocket Gateway Demo</h1>
+            <ol class="list-decimal ml-6">
+                <li class="py-4">
+                    <h4>Setup a Cloud Cluster</h4>
+                    <div>
+                        <p>
+                            <a
+                                href="https://www.fluvio.io/docs/latest/cloud/quickstart"
+                                target="_blank"
+                                class="text-blue-600"
+                                >Follow quickstart documentation</a
+                            >
+                        </p>
+                        <ol class="list-[lower-alpha] ml-6">
+                            <li>Register</li>
+                            <li>Install CLI</li>
+                            <li>Login with CLI</li>
+                            <li>Create an cluster</li>
+                            <li>
+                                Create a topic named <strong>webdemo</strong>
+                            </li>
+                        </ol>
+                    </div>
+                </li>
+                <li class="py-4">
+                    <p>Generate Access key</p>
+                    <code>
+                        $ fluvio cloud access-key create web-demo --stream-type
+                        simple --topic webdemo
+                    </code>
+                </li>
+                <li class="py-4">
+                    <p>Enter generated access key here</p>
+                    <div class="mb-4">
+                        <input
+                            class="shadow border rounded w-100 py-2 px-3 text-gray-7"
+                            id="access_key"
+                            type="text"
+                            placeholder="Access Key"
+                            required
+                        />
+                    </div>
+                </li>
+                <li class="py-4">
+                    <button class="text-white bg-blue-700 rounded w-24 p-1">
+                        Start
+                    </button>
+                </li>
+            </ol>
+        </div>
+        <div class="border m-3 p-3 hidden">
+            <h2 class="text-xl">Producer Iframe</h2>
+            <iframe id="produce" width="100%" sandbox="allow-scripts"></iframe>
+        </div>
+        <div class="border m-3 p-3 hidden">
+            <h2 class="text-xl">Consumer Iframe</h2>
+            <iframe
+                id="consume"
+                width="100%"
+                height="400px"
+                sandbox="allow-scripts"
+            ></iframe>
+        </div>
+
+        <script>
+            const button = document.querySelector("button");
+            const access_key = document.querySelector("#access_key");
+
+            button.onclick = () => {
+                if (access_key.value === "") {
+                    alert("Please enter access key");
+                    return;
+                }
+                const producer = document.querySelector("#produce");
+                const consumer = document.querySelector("#consume");
+                producer.src = `produce.html?access_key=${access_key.value}`;
+                consumer.src = `consume.html?access_key=${access_key.value}`;
+                document.querySelectorAll(".hidden").forEach((el) => {
+                    el.classList.remove("hidden");
+                });
+            };
+        </script>
+    </body>
+</html>

@@ -1,0 +1,73 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Consumer</title>
+        <script src=" https://cdn.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js "></script>
+        <style>
+            body {
+                font-family: sans-serif;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="waiting">Waiting for connection...</div>
+        <div id="chart" style="width: 100%; height: 400px; display: none"></div>
+        <script>
+            let option;
+            let chart;
+            function initChart() {
+                // Initialize ECharts chart
+                // https://echarts.apache.org/handbook/en/how-to/chart-types/scatter/basic-scatter
+                chart = echarts.init(document.querySelector("#chart"));
+
+                // Set chart options
+                option = {
+                    dataZoom: [
+                        {
+                            type: "slider",
+                        },
+                        {
+                            type: "inside",
+                        },
+                    ],
+                    xAxis: {
+                        type: "value",
+                    },
+                    yAxis: {
+                        type: "value",
+                    },
+                    series: [
+                        {
+                            // type: 'line', // a little bit of update justter on ff
+                            type: "scatter",
+                            data: [],
+                        },
+                    ],
+                };
+                chart.setOption(option);
+            }
+
+            const access_key = new URLSearchParams(window.location.search).get(
+                "access_key",
+            );
+
+            // Connect to WebSocket
+            const ws = new WebSocket(
+                `wss://dev.infinyon.cloud/wsr/v1/simple/consume?access_key=${access_key}`,
+            );
+
+            ws.onopen = () => {
+                document.querySelector("#waiting").style.display = "none";
+                document.querySelector("#chart").style.display = "block";
+                initChart();
+            };
+
+            // Handle WebSocket message
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                option.series[0].data.push([data.x, data.y]);
+                chart.setOption(option);
+            };
+        </script>
+    </body>
+</html>

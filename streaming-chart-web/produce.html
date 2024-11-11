@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Producer</title>
+        <style>
+            body {
+                font-family: sans-serif;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="waiting">Waiting for connection...</div>
+        <div id="producer" style="display: none" width="100%">
+            <div style="flex: 1;">
+                <h3>Sine Wave Generator</h3>
+                <button onclick="pause()" style="display: block; width: 70px; padding: 10px;">
+                    Pause
+                </button>
+                <button
+                    onclick="play()"
+                    style="display: block; width: 70px; padding: 10px;"
+                    disabled
+                >
+                    Play
+                </button>
+            </div>
+            <div style="flex: 1;">
+                <textarea
+                    id="stream"
+                    style="width: 100%; height: 124px"
+                ></textarea>
+            </di>
+        </div>
+        <script>
+            const access_key = new URLSearchParams(window.location.search).get(
+                "access_key",
+            );
+
+            // Connect to WebSocket
+            const ws = new WebSocket(
+                `wss://dev.infinyon.cloud/wsr/v1/simple/produce?access_key=${access_key}`,
+            );
+
+            function produce(x, y) {
+                ws.send(JSON.stringify({ x, y }));
+
+                const textarea = document.querySelector("#stream");
+                textarea.value += `${x}, ${y}\n`;
+                textarea.scrollTop = textarea.scrollHeight;
+            }
+
+            function startSineWave() {
+                let x = 0;
+                window.sineWaveIntervalId = setInterval(() => {
+                    produce(x, Math.sin(x));
+                    x += 0.1;
+                }, 400);
+            }
+
+            function stopSineWave() {
+                clearInterval(window.sineWaveIntervalId);
+            }
+
+            function pause() {
+                stopSineWave();
+                document.querySelector("button[onclick='play()']").disabled =
+                    false;
+                document.querySelector("button[onclick='pause()']").disabled =
+                    true;
+            }
+
+            function play() {
+                startSineWave();
+                document.querySelector("button[onclick='play()']").disabled =
+                    true;
+                document.querySelector("button[onclick='pause()']").disabled =
+                    false;
+            }
+
+            ws.onopen = () => {
+                document.querySelector("#waiting").style.display = "none";
+                document.querySelector("#producer").style.display = "flex";
+                startSineWave();
+            };
+        </script>
+    </body>
+</html>
